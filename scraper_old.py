@@ -98,27 +98,27 @@ while next_li_element is not None:
 
 
 print("\n#\n Implement the crawling logic # ########################################################################\n")
-
-# scraping logic...
-
-# reading  the "quotes.csv" file and creating it
-# if not present
-csv_file = open('quotes.csv', 'w', encoding='utf-8', newline='')
-
-# initializing the writer object to insert data
-# in the CSV file
-writer = csv.writer(csv_file)
-
-# writing the header of the CSV file
-writer.writerow(['Text', 'Author', 'Tags'])
-
-# writing each row of the CSV
-for quote in quotes:
-    writer.writerow(quote.values())
-
-# terminating the operation and releasing the resources
-csv_file.close()
-
+#
+# # scraping logic...
+#
+# # reading  the "quotes.csv" file and creating it
+# # if not present
+# csv_file = open('quotes.csv', 'w', encoding='utf-8', newline='')
+#
+# # initializing the writer object to insert data
+# # in the CSV file
+# writer = csv.writer(csv_file)
+#
+# # writing the header of the CSV file
+# writer.writerow(['Text', 'Author', 'Tags'])
+#
+# # writing each row of the CSV
+# for quote in quotes:
+#     writer.writerow(quote.values())
+#
+# # terminating the operation and releasing the resources
+# csv_file.close()
+#
 
 
 
