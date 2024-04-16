@@ -2,7 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
-def scrape_page(soup, quotes):
+def scrape_page(soup, quotes, pgNum):
+    print("Scraping Page #", pgNum)
+
     # retrieving all the quote <div> HTML element on the page
     quote_elements = soup.find_all('div', class_='quote')
 
@@ -51,8 +53,11 @@ soup = BeautifulSoup(page.text, 'html.parser')
 # the list of all quote data
 quotes = []
 
+# page number that is processing
+pageNumber = 1
+
 # scraping the home page
-scrape_page(soup, quotes)
+scrape_page(soup, quotes, pageNumber)
 
 # getting the "Next →" HTML element
 next_li_element = soup.find('li', class_='next')
@@ -67,8 +72,10 @@ while next_li_element is not None:
     # parsing the new page
     soup = BeautifulSoup(page.text, 'html.parser')
 
+    pageNumber += 1
+
     # scraping the new page
-    scrape_page(soup, quotes)
+    scrape_page(soup, quotes, pageNumber)
 
     # looking for the "Next →" HTML element in the new page
     next_li_element = soup.find('li', class_='next')
