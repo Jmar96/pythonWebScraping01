@@ -1,38 +1,93 @@
 import requests
 from bs4 import BeautifulSoup
+import csv
 
+def scrape_page(soup, quotes):
+    # retrieving all the quote <div> HTML element on the page
+    quote_elements = soup.find_all('div', class_='quote')
 
-# scraping logic...
-page = requests.get('https://quotes.toscrape.com')
-# print(page.status_code)
+    # iterating over the list of quote elements
+    # to extract the data of interest and store it
+    # in quotes
+    for quote_element in quote_elements:
+        # extracting the text of the quote
+        text = quote_element.find('span', class_='text').text
+        # extracting the author of the quote
+        author = quote_element.find('small', class_='author').text
 
+        # extracting the tag <a> HTML elements related to the quote
+        tag_elements = quote_element.find('div', class_='tags').find_all('a', class_='tag')
+
+        # storing the list of tag strings in a list
+        tags = []
+        for tag_element in tag_elements:
+            tags.append(tag_element.text)
+
+        # appending a dictionary containing the quote data
+        # in a new format in the quote list
+        quotes.append(
+            {
+                'text': text,
+                'author': author,
+                'tags': ', '.join(tags)  # merging the tags into a "A, B, ..., Z" string
+            }
+        )
+
+# the url of the home page of the target website
+base_url = 'https://quotes.toscrape.com'
+
+# defining the User-Agent header to use in the GET request below
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
+}
+
+# retrieving the target web page
+page = requests.get(base_url, headers=headers)
+
+# parsing the target web page with Beautiful Soup
 soup = BeautifulSoup(page.text, 'html.parser')
 
-# get all <h1> elements
-# on the page
-h1_elements = soup.find_all('h1')
-print("h1_elements : ", h1_elements)
+# initializing the variable that will contain
+# the list of all quote data
+quotes = []
 
-# get the element with id="main-title"
-main_title_element = soup.find(id='main-title')
-print("main_title_element : ", main_title_element)
+# scraping the home page
+scrape_page(soup, quotes)
 
-# find the footer element
-# based on the text it contains
-footer_element = soup.find(string={'Powered by WordPress'})
-print("footer_element : ", footer_element)
+# getting the "Next →" HTML element
+next_li_element = soup.find('li', class_='next')
 
-# find the email input element
-# through its "name" attribute
-email_element = soup.find(attrs={'name': 'email'})
-print("email_element : ", email_element)
+# if there is a next page to scrape
+while next_li_element is not None:
+    next_page_relative_url = next_li_element.find('a', href=True)['href']
 
-# find all the centered elements
-# on the page
-centered_element = soup.find_all(class_='text-center')
-print("centered_element : ", centered_element)
+    # getting the new page
+    page = requests.get(base_url + next_page_relative_url, headers=headers)
 
-# get all "li" elements
-# in the ".navbar" element
-print(soup.select('.navbar > li'))
+    # parsing the new page
+    soup = BeautifulSoup(page.text, 'html.parser')
+
+    # scraping the new page
+    scrape_page(soup, quotes)
+
+    # looking for the "Next →" HTML element in the new page
+    next_li_element = soup.find('li', class_='next')
+
+# reading  the "quotes.csv" file and creating it
+# if not present
+csv_file = open('quotes.csv', 'w', encoding='utf-8', newline='')
+
+# initializing the writer object to insert data
+# in the CSV file
+writer = csv.writer(csv_file)
+
+# writing the header of the CSV file
+writer.writerow(['Text', 'Author', 'Tags'])
+
+# writing each row of the CSV
+for quote in quotes:
+    writer.writerow(quote.values())
+
+# terminating the operation and releasing the resources
+csv_file.close()
 
